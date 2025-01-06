@@ -12,6 +12,9 @@ export default {
         background: "var(--background)",
         foreground: "var(--foreground)",
       },
+      rotate: {
+        'y-90': 'rotateY(90deg)',  // Adding custom class for 90 degree Y-axis rotation
+      },
     },
   },
   plugins: [],
