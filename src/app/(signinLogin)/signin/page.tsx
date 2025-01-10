@@ -311,7 +311,7 @@ const LogIn: React.FC = () => {
             className="bg-white gap-1 flex items-center rounded-lg pl-10 pr-10 pt-3 pb-3 font-bold border-black border-2"
           >
             <img src="sign.png" alt="Sign In Icon" />
-            Sign In
+            SignIn
           </button>
           <button
             ref={(el) => {
@@ -323,7 +323,7 @@ const LogIn: React.FC = () => {
             className="bg-white flex gap-1 rounded-lg items-center pl-10 pr-10 pt-3 pb-3 font-bold border-black border-2"
           >
             <img src="log.png" alt="Log In Icon" />
-            Log In
+            LogIn
           </button>
         </div>
       </div>

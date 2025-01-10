@@ -7,6 +7,8 @@ interface MasonryItem {
   title: string;
   video?: string;
   id: Number;
+  primaryColor: string;
+  secondaryColor: string;
 }
 
 interface MasonryLayoutProps {
@@ -100,7 +102,20 @@ const MasonryLayout: React.FC<MasonryLayoutProps> = ({ items }) => {
     null
   );
 
+  const [showVideo, setShowVideo] = useState(false);
+
+  const [bgColor, setBgColor] = useState("rgb(255,255,255)");
+
+  const [selectVideo, setSelectVideo] = useState("");
+  const [selectVideoColor, setSelectVideoColor] = useState("");
+
+  const [selectedVideoId, setSelectedVideoId] = useState("");
+
+  const [videoLoaded, setVideoLoaded] = useState(false);
+
   const videoRefs = useRef<HTMLVideoElement | null>(null);
+
+  const [playable, setPlayable] = useState(true);
 
   const handleVideoPlay = (
     videoElement: HTMLVideoElement,
@@ -122,26 +137,97 @@ const MasonryLayout: React.FC<MasonryLayoutProps> = ({ items }) => {
       });
     }
   }, [hoverItem]);
+
+  useEffect(() => {
+    const video = document.getElementById("mainPlayer") as HTMLVideoElement;
+    console.log(video);
+    if (video) {
+      const id = selectedVideoId;
+      getVideoTime(id || "").then(({ time, volume }) => {
+        handleVideoPlay(video, time);
+        video.volume = volume;
+      });
+    }
+  }, [videoLoaded]);
+
   const [expanded, setExpanded] = useState(false);
 
   const handleClick = () => {
     setExpanded(!expanded);
   };
+
+  const resetVideo = (
+    e:
+      | React.MouseEvent<HTMLDivElement, MouseEvent>
+      | React.TouchEvent<HTMLDivElement>,
+    item: MasonryItem,
+    index: number,
+    video?: HTMLVideoElement
+  ) => {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+    if (timeoutScaleId) {
+      clearTimeout(timeoutScaleId);
+    }
+    const id = `vid${item.id}`;
+    if (videoRefs.current) {
+      saveVideoTime(
+        id,
+        videoRefs.current.currentTime,
+        videoRefs.current.volume
+      );
+    }
+
+    const div = document.getElementById(`div${index}`);
+    if (div) {
+      div.style.scale = "1";
+      div.style.transition = "0s";
+    }
+    resetAnimation(e.currentTarget as HTMLDivElement);
+    setHoverItem(null);
+    setBgColor("rgb(255,255,255)");
+  };
+
   return (
-    <div className="columns-1 sm:columns-3 md:columns-4 lg:columns-6 gap-4">
-      {/* <div
+    <div
+      style={{
+        backgroundColor: bgColor,
+        transition: "3s",
+      }}
+      className="columns-1 sm:columns-3 md:columns-4 lg:columns-6 gap-4 p-5 rounded-2xl"
+    >
+      <div
         style={{
           backgroundColor: "rgb(255 255 255 / 66%)",
+          display: showVideo ? "flex" : "none",
         }}
         className="w-full h-full absolute z-50 top-0 left-0 flex justify-center items-center "
       >
-        <div className="w-11/12 md:w-5/6 lg:w-5/6 xl:w-3/6 h-4/5 bg-white rounded-3xl border-2 border-black">
+        <div
+          style={{
+            backgroundColor: selectVideoColor,
+          }}
+          className="w-11/12 md:w-5/6 lg:w-5/6 xl:w-3/6 h-4/5 bg-white rounded-3xl border-2 border-black"
+        >
           <div
-            className="w-full rounded-t-3xl bg-black relative"
+            className="w-full rounded-t-2xl bg-black relative"
             style={{
               aspectRatio: 16 / 7,
             }}
           >
+            {selectVideo ? (
+              <video
+                id="mainPlayer"
+                controls
+                autoPlay
+                className="absolute w-full h-full"
+              >
+                <source src={selectVideo} type="video/mp4" />
+              </video>
+            ) : (
+              ""
+            )}
             <div
               className="m-3 rounded-lg border-2 border-black right-0 absolute flex"
               style={{
@@ -151,6 +237,19 @@ const MasonryLayout: React.FC<MasonryLayoutProps> = ({ items }) => {
                 backgroundImage: "url(close.svg)",
                 backgroundSize: "80% 80%",
                 backgroundColor: "rgb(255 255 255 / 66%)",
+              }}
+              onClick={() => {
+                setPlayable(true);
+                setShowVideo(false);
+                setSelectVideo("");
+                setSelectVideoColor("");
+                setSelectedVideoId("");
+                setVideoLoaded(false);
+                const video = document.getElementById(
+                  "mainPlayer"
+                ) as HTMLVideoElement;
+
+                saveVideoTime(selectedVideoId, video.currentTime, video.volume);
               }}
             ></div>
             <div
@@ -191,77 +290,55 @@ const MasonryLayout: React.FC<MasonryLayoutProps> = ({ items }) => {
             </div>
           </div>
         </div>
-      </div> */}
+      </div>
 
       {items.map((item, index) => (
         <div
           id={`div${index}`}
           key={index}
+          style={{
+            backgroundColor: item.primaryColor,
+          }}
+          onClick={(e) => {
+            setPlayable(false);
+            resetVideo(e, item, index);
+            setSelectVideo(item.video || "");
+            setShowVideo(true);
+            setSelectVideoColor(item.primaryColor);
+            setSelectedVideoId("vid" + item.id);
+            setVideoLoaded(true);
+          }}
           onMouseEnter={(e) => {
-            hoverAnimation(e.currentTarget as HTMLDivElement);
-            if (timeoutId) {
-              clearTimeout(timeoutId);
-            }
-            const id = setTimeout(() => {
-              setHoverItem(index);
-            }, 2000);
-            const scaleID = setTimeout(() => {
-              const div = document.getElementById(`div${index}`);
-              if (div) {
-                div.style.scale = "1.5";
-                div.style.transition = "0.5s";
+            if (playable) {
+              hoverAnimation(e.currentTarget as HTMLDivElement);
+              if (timeoutId) {
+                clearTimeout(timeoutId);
               }
-            }, 8000);
-            setTimeoutScaleId(scaleID);
-            setTimeoutId(id);
+              const id = setTimeout(() => {
+                setHoverItem(index);
+              }, 2000);
+              const scaleID = setTimeout(() => {
+                const div = document.getElementById(`div${index}`);
+                if (div) {
+                  div.style.scale = "1.5";
+                  div.style.transition = "0.5s";
+                }
+              }, 8000);
+              setTimeoutScaleId(scaleID);
+              setTimeoutId(id);
+              // setBgColor(item.primaryColor);
+              setBgColor(item.secondaryColor);
+            } else {
+              resetVideo(e, item, index);
+            }
           }}
           onMouseLeave={(e) => {
-            if (timeoutId) {
-              clearTimeout(timeoutId);
-            }
-            if (timeoutScaleId) {
-              clearTimeout(timeoutScaleId);
-            }
-            const id = `vid${item.id}`;
-            if (videoRefs.current) {
-              saveVideoTime(
-                id,
-                videoRefs.current.currentTime,
-                videoRefs.current.volume
-              );
-            }
-            const div = document.getElementById(`div${index}`);
-            if (div) {
-              div.style.scale = "1";
-              div.style.transition = "0s";
-            }
-            resetAnimation(e.currentTarget as HTMLDivElement);
-            setHoverItem(null);
+            resetVideo(e, item, index);
           }}
           onTouchEnd={(e) => {
-            if (timeoutId) {
-              clearTimeout(timeoutId);
-            }
-            if (timeoutScaleId) {
-              clearTimeout(timeoutScaleId);
-            }
-            const id = `vid${item.id}`;
-            if (videoRefs.current) {
-              saveVideoTime(
-                id,
-                videoRefs.current.currentTime,
-                videoRefs.current.volume
-              );
-            }
-            const div = document.getElementById(`div${index}`);
-            if (div) {
-              div.style.scale = "1";
-              div.style.transition = "0s";
-            }
-            resetAnimation(e.currentTarget as HTMLDivElement);
-            setHoverItem(null);
+            resetVideo(e, item, index);
           }}
-          className="mb-4 break-inside-avoid rounded-3xl border-black border-2 overflow-hidden relative group"
+          className="mb-4 break-inside-avoid rounded-2xl border-black border-2 overflow-hidden relative group"
         >
           <button className="absolute m-4 right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg bg-white text-black p-2">
             Save
@@ -285,7 +362,7 @@ const MasonryLayout: React.FC<MasonryLayoutProps> = ({ items }) => {
           <img
             src={item.image}
             alt={item.title}
-            className="w-full rounded-3xl object-cover h-full"
+            className="w-full  object-cover h-full"
           />
         </div>
       ))}

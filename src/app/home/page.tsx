@@ -1,24 +1,55 @@
+"use client";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import MasonryLayout from "@/components/MasonaryLayout";
 
+interface MasonryItem {
+  image: string;
+  title: string;
+  video?: string;
+  id: number;
+  primaryColor:string;
+  secondaryColor:string;
+}
+
 const Home: React.FC = () => {
-  const items = [
-    { id:1,video:'http://localhost:8080/api/v1/VideoService/play?v=C:/Users/BLACKBOX/Videos/New%20folder/The%20Carpenters%20-%20Top%20Of%20The%20World%20%E2%80%A2%20TopPop.mp4',image: 'https://i.pinimg.com/736x/61/3e/b1/613eb1864c8d05405718e19b237e7f97.jpg', title: 'Item 1' },
-    { id:2,video:'http://localhost:8080/api/v1/VideoService/play?v=C:/Users/BLACKBOX/Videos/New%20folder/Top%20of%20the%20World%20-%20The%20Petersens%20(LIVE).mp4',image: 'https://i.pinimg.com/736x/d5/f2/c6/d5f2c6fac0e0f6496a039370c2be8732.jpg', title: 'Item 2' },
-    { id:3,video:'http://localhost:8080/api/v1/VideoService/play?v=C:/Users/BLACKBOX/Videos/New%20folder/The%20Carpenters%20-%20Top%20Of%20The%20World%20%E2%80%A2%20TopPop.mp4',image: 'https://i.pinimg.com/736x/20/b9/3a/20b93adb7581b02759375f4563cb4245.jpg', title: 'Item 3' },
-    { id:4,image: 'https://i.pinimg.com/736x/3d/cc/94/3dcc9490f725ea657f64046e3976127d.jpg', title: 'Item 4' },
-    { id:5,image: 'https://i.pinimg.com/736x/5b/47/b3/5b47b379b1b68203e775220a697f84af.jpg', title: 'Item 5' },
-    { id:6,image:'https://i.pinimg.com/736x/77/92/83/779283c649b3bae6b86da9373dc0130f.jpg',title:"img 5"},
-    { id:7,image: 'https://i.pinimg.com/736x/61/3e/b1/613eb1864c8d05405718e19b237e7f97.jpg', title: 'Item 1' },
-    { id:8,image: 'https://i.pinimg.com/736x/d5/f2/c6/d5f2c6fac0e0f6496a039370c2be8732.jpg', title: 'Item 2' },
-    { id:9,image: 'https://i.pinimg.com/736x/20/b9/3a/20b93adb7581b02759375f4563cb4245.jpg', title: 'Item 3' },
-    { id:10,image: 'https://i.pinimg.com/736x/3d/cc/94/3dcc9490f725ea657f64046e3976127d.jpg', title: 'Item 4' },
-    { id:11,image: 'https://i.pinimg.com/736x/5b/47/b3/5b47b379b1b68203e775220a697f84af.jpg', title: 'Item 5' },
-    { id:12,image:'https://i.pinimg.com/736x/77/92/83/779283c649b3bae6b86da9373dc0130f.jpg',title:"img 5"}
-];
+  const [items, setItems] =useState<MasonryItem[]>([]);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+    axios
+      .get("http://localhost:8080/api/v1/VideoService/videos")
+      .then((response) => {
+
+        let data:MasonryItem[]=response.data
+
+        data=data.map(item => {
+          return {
+            ...item,
+            video: `http://localhost:8080/api/v1/VideoService/play?v=${item.video?.replaceAll('\\','/')}`,
+            image: `http://localhost:8080/api/v1/VideoService/view?i=${item.image?.replaceAll('\\','/')}`
+          };
+        });
+  
+        setItems(data);
+      })
+      .catch((err) => {
+        console.error("Error fetching videos:", err);
+      });
+  }, []);
+
+  if (!isClient) {
+    return null;
+  }
 
   return (
-    <div className="p-10">
-      <MasonryLayout items={items} />
+    <div className="p-5">
+      {items.length > 0 ? (
+        <MasonryLayout items={items} />
+      ) : (
+        <div>Loading videos...</div>
+      )}
     </div>
   );
 };
