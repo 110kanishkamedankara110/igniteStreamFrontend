@@ -24,14 +24,14 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.GH_TOKEN }}
 
       # Step 3: Build the Docker image
       - name: Build Docker Image
         run: |
-          docker build -t ghcr.io/${{ github.actor }}/${{ env.IMAGE_NAME }}:latest .
+          docker build -t ghcr.io/${{ github.actor }}/${{ github.event.repository.name }}:latest .
 
       # Step 4: Push the Docker image to GitHub Container Registry
       - name: Push Docker Image
         run: |
-          docker push ghcr.io/${{ github.actor }}/${{ env.IMAGE_NAME }}:latest
+          docker push ghcr.io/${{ github.actor }}/${{ github.event.repository.name }}:latest
