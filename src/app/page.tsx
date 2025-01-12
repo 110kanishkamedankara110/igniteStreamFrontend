@@ -190,7 +190,7 @@ const Home = () => {
         onClick={() => {
           router.push("/login");
         }}
-        label="Login"
+        label="LogIn"
         layers={layers1}
       />
       <SelectionCard
