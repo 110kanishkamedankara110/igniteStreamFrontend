@@ -34,7 +34,7 @@ jobs:
       # Step 4: Push the Docker image to GitHub Container Registry
       - name: Push Docker Image
         run: |
-          docker push ghcr.io/<your-username>/igstreamfe:latest
+          docker push ghcr.io/${{ github.actor }}/igstreamfe:latest
 
   redeploy:
     name: Redeploy on Server
