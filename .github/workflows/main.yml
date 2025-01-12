@@ -50,6 +50,6 @@ jobs:
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_TOKEN }}
           script: |
-            cd /DockerTestApps/
+            cd DockerTestApps/
             docker-compose pull
             docker-compose up -d
