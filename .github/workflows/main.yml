@@ -4,14 +4,14 @@ on:
   pull_request:
     branches:
       - main
-  push:
-    branches:
-      - main
-
+    types:
+      - closed   # Only triggers when the PR is closed (merged or declined)
+      
 jobs:
   build-and-push:
     name: Build and Push Docker Image
     runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true  # Ensures job runs only if PR is merged
 
     steps:
       # Step 1: Checkout the code
@@ -40,6 +40,7 @@ jobs:
     name: Redeploy on Server
     needs: build-and-push
     runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true  # Ensures job runs only if PR is merged
 
     steps:
       # Step 5: Trigger deployment on the server
