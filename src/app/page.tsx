@@ -193,14 +193,14 @@ const Home = () => {
         label="Login"
         layers={layers1}
       />
-      <SelectionCard
+      {/* <SelectionCard
         ref={card2}
         label="SignIn"
         layers={layers2}
         onClick={() => {
           router.push("/signin");
         }}
-      />
+      /> */}
     </div>
   );
 };
