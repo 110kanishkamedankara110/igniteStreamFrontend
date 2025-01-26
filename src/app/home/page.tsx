@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import MasonryLayout from "@/components/MasonaryLayout";
-
+import Header from "@/components/Header";
 interface MasonryItem {
   image: string;
   title: string;
@@ -44,7 +44,8 @@ const Home: React.FC = () => {
   }
 
   return (
-    <div className="p-5">
+    <div  className="p-5">
+      <Header/>
       {items.length > 0 ? (
         <MasonryLayout items={items} />
       ) : (
