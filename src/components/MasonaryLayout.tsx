@@ -416,7 +416,7 @@ const MasonryLayout: React.FC<MasonryLayoutProps> = ({ items }) => {
                 if (playable) {
                   const div = document.getElementById(`div${index}`);
                   if (div) {
-                    div.style.scale = "1.5";
+                    div.style.scale = "2";
                     div.style.transition = "0.5s";
                   }
                 }
